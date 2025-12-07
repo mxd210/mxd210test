@@ -1,0 +1,20 @@
+{
+  "generated_at": "2025-12-07T10:04:29.392Z",
+  "tool": "MXD-BOTBUYAUTO",
+  "version": "v0.2-2025-12-07",
+  "count": 1,
+  "items": [
+    {
+      "name": "TEST - Áo thun nữ ôm body JUSTDUN B18",
+      "price": 0,
+      "merchant": "shopee",
+      "origin_url": "https://shopee.vn/%C3%81o-Thun-N%E1%BB%AF-%C3%94m-Body-JUSTDUN-B18-C%E1%BB%95-Tr%C3%B2n-Tay-Ng%E1%BA%AFn-Cotton-M%E1%BB%8Bn-Co-Gi%C3%A3n-4-Chi%E1%BB%81u-M%E1%BB%81m-M%E1%BA%A1i-Tho%C3%A1ng-Kh%C3%AD-i.16848981.26026184103",
+      "image": "",
+      "sku": "c3-81o-thun-n-e1-bb-af-c3-94m-body-justdun-b18-c-e1-bb-95-tr-c3-b2n-ta",
+      "sub2": "mxd210",
+      "sub3": "testbotbuy",
+      "sub4": "publish-01",
+      "deeplink": "https://go.isclix.com/deep_link/6803097511817356947/4751584435713464237?url=https%3A%2F%2Fshopee.vn%2F%25C3%2581o-Thun-N%25E1%25BB%25AF-%25C3%2594m-Body-JUSTDUN-B18-C%25E1%25BB%2595-Tr%25C3%25B2n-Tay-Ng%25E1%25BA%25AFn-Cotton-M%25E1%25BB%258Bn-Co-Gi%25C3%25A3n-4-Chi%25E1%25BB%2581u-M%25E1%25BB%2581m-M%25E1%25BA%25A1i-Tho%25C3%25A1ng-Kh%25C3%25AD-i.16848981.26026184103&sub1=c3-81o-thun-n-e1-bb-af-c3-94m-body-justdun-b18-c-e1-bb-95-tr-c3-b2n-ta&sub2=mxd210&sub3=testbotbuy&sub4=publish-01"
+    }
+  ]
+}
