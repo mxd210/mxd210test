@@ -27,19 +27,9 @@
       color:var(--text);
       padding:16px;
     }
-    .wrap{
-      max-width:1080px;
-      margin:0 auto;
-    }
-    h1{
-      font-size:1.6rem;
-      margin:0 0 12px;
-    }
-    p{
-      margin:4px 0;
-      color:var(--muted);
-      font-size:0.92rem;
-    }
+    .wrap{max-width:1080px;margin:0 auto;}
+    h1{font-size:1.6rem;margin:0 0 12px;}
+    p{margin:4px 0;color:var(--muted);font-size:0.92rem;}
     .grid{
       display:grid;
       grid-template-columns:1.1fr 1fr;
@@ -53,16 +43,8 @@
       padding:14px 16px;
       box-shadow:0 20px 40px rgba(0,0,0,0.45);
     }
-    .panel h2{
-      font-size:1.05rem;
-      margin:0 0 8px;
-    }
-    label{
-      display:block;
-      font-size:0.85rem;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
+    .panel h2{font-size:1.05rem;margin:0 0 8px;}
+    label{display:block;font-size:0.85rem;color:var(--muted);margin-bottom:4px;}
     input,select,textarea{
       width:100%;
       padding:7px 9px;
@@ -83,23 +65,11 @@
       font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
       white-space:pre;
     }
-    .row{
-      display:flex;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .row > div{
-      flex:1;
-    }
-    .btn-row{
-      display:flex;
-      gap:8px;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
+    .row{display:flex;gap:10px;margin-bottom:10px;}
+    .row > div{flex:1;}
+    .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
     button{
-      border:none;
-      border-radius:999px;
+      border:none;border-radius:999px;
       padding:7px 14px;
       font-size:0.9rem;
       cursor:pointer;
@@ -118,10 +88,7 @@
       background:rgba(248,113,113,0.16);
       color:var(--danger);
     }
-    button[disabled]{
-      opacity:0.55;
-      cursor:default;
-    }
+    button[disabled]{opacity:0.55;cursor:default;}
     .tag{
       display:inline-flex;
       align-items:center;
@@ -132,13 +99,8 @@
       color:var(--muted);
       gap:4px;
     }
-    .tag-dot{
-      width:7px;height:7px;border-radius:999px;background:var(--accent);
-    }
-    .status{
-      margin-top:6px;
-      font-size:0.84rem;
-    }
+    .tag-dot{width:7px;height:7px;border-radius:999px;background:var(--accent);}
+    .status{margin-top:6px;font-size:0.84rem;}
     .status.ok{color:var(--ok);}
     .status.err{color:var(--danger);}
     .status.warn{color:var(--warn);}
@@ -156,18 +118,16 @@
       color:var(--muted);
     }
     ul.micro li{margin:1px 0;}
-    @media(max-width:860px){
-      .grid{grid-template-columns:1fr;}
-    }
+    @media(max-width:860px){.grid{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>MXD BotBuyAuto – Test kéo sản phẩm & publish JSON</h1>
-    <p>Công cụ test nội bộ: chọn campaign, domain và số lượng, sau đó bấm để Worker gọi AccessTrade, chuẩn hoá schema MXD và ghi vào <code>data/affiliates.json</code> của repo test.</p>
+    <p>Công cụ test nội bộ: chọn campaign, domain, mã ngành (cate) và số lượng, sau đó bấm để Worker gọi AccessTrade, chuẩn hoá schema MXD và ghi vào <code>data/affiliates.json</code> của repo test.</p>
 
     <div class="grid">
-      <!-- FORM BÊN TRÁI -->
+      <!-- FORM -->
       <div class="panel">
         <h2>Cấu hình & thao tác</h2>
 
@@ -203,8 +163,17 @@
 
         <div class="row">
           <div>
-            <label for="categorySlug">Category slug MXD (gán cho tất cả item)</label>
-            <input id="categorySlug" type="text" placeholder="vd: thoi-trang-nu / do-gia-dung"/>
+            <label for="atCate">AT cate (mã ngành hàng)</label>
+            <input id="atCate" type="text"
+                   placeholder="vd: cong-nghe, dien-thoai-may-tinh-bang, thiet-bi-gia-dung"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="categorySlug">Category slug MXD (đặt tên kệ hàng)</label>
+            <input id="categorySlug" type="text"
+                   placeholder="vd: do-dien-tu, do-gia-dung, thoi-trang-nu"/>
           </div>
         </div>
 
@@ -245,15 +214,18 @@
         <div id="status" class="status"></div>
 
         <ul class="micro">
-          <li>sub2 mặc định: <code>mxd210</code>, sub3: <code>botbuyauto</code>, sub4: campaign/category.</li>
+          <li><b>AT cate</b> là mã ngành của AccessTrade, ví dụ:
+            <code>cong-nghe</code>, <code>dien-thoai-may-tinh-bang</code>,
+            <code>thiet-bi-gia-dung</code>, <code>thoi-trang-my-pham</code>, <code>suc-khoe</code>…</li>
+          <li><b>Category slug MXD</b> là tên kệ của Mai (vd: <code>do-dien-tu</code>), sẽ ghi vào field <code>category</code> trong JSON.</li>
           <li>Ảnh hiện vẫn dùng URL từ AccessTrade – bước sau sẽ có tool riêng tải ảnh & đổi sang .webp local.</li>
         </ul>
       </div>
 
-      <!-- PREVIEW BÊN PHẢI -->
+      <!-- PREVIEW -->
       <div class="panel">
         <h2>Preview dữ liệu</h2>
-        <p style="margin-bottom:6px;">Xem nhanh các sản phẩm sẽ được publish (tối đa 50). Đây chỉ là preview để Mai kiểm tra tên, giá, origin, sku…</p>
+        <p style="margin-bottom:6px;">Xem nhanh các sản phẩm sẽ được publish (tối đa 50). Đây chỉ là preview để kiểm tra tên, giá, origin, sku, cate…</p>
         <textarea id="preview" readonly placeholder="Chưa có dữ liệu. Bấm &quot;Lấy sản phẩm&quot; để xem."></textarea>
       </div>
     </div>
@@ -266,7 +238,8 @@
     const campaignEl     = $('#campaign');
     const domainEl       = $('#domain');
     const limitEl        = $('#limit');
-    const categoryEl     = $('#categorySlug');
+    const atCateEl       = $('#atCate');
+    const categorySlugEl = $('#categorySlug');
     const targetPathEl   = $('#targetPath');
     const commitMsgEl    = $('#commitMessage');
     const dryRunEl       = $('#dryRun');
@@ -278,7 +251,7 @@
 
     let currentItems = [];
 
-    // auto sync domain theo campaign (cho nhanh)
+    // auto sync domain theo campaign
     campaignEl.addEventListener('change', () => {
       const c = campaignEl.value;
       if (c === 'shopee') domainEl.value = 'shopee.vn';
@@ -295,7 +268,11 @@
 
     function setStatus(text, level = 'info') {
       statusEl.textContent = text || '';
-      statusEl.className = 'status ' + (level === 'ok' ? 'ok' : level === 'err' ? 'err' : level === 'warn' ? 'warn' : '');
+      statusEl.className = 'status ' + (
+        level === 'ok' ? 'ok' :
+        level === 'err' ? 'err' :
+        level === 'warn' ? 'warn' : ''
+      );
     }
 
     function updateTag() {
@@ -315,19 +292,19 @@
       if (limit > 50) limit = 50;
       limitEl.value = String(limit);
 
-      if (!base) {
-        setStatus('Thiếu Worker base URL.', 'err');
-        return;
-      }
-      if (!campaign) {
-        setStatus('Thiếu campaign.', 'err');
-        return;
-      }
+      const atCate = atCateEl.value.trim();
+
+      if (!base) { setStatus('Thiếu Worker base URL.', 'err'); return; }
+      if (!campaign) { setStatus('Thiếu campaign.', 'err'); return; }
 
       const url = new URL(base + '/auto/fetch');
       url.searchParams.set('campaign', campaign);
       if (domain) url.searchParams.set('domain', domain);
       url.searchParams.set('limit', String(limit));
+      if (atCate) {
+        // gửi cate lên Worker; nếu Worker forward, server sẽ lọc bớt giúp
+        url.searchParams.set('cate', atCate);
+      }
 
       setLoading(true);
       setStatus('Đang gọi /auto/fetch…', 'info');
@@ -343,8 +320,27 @@
           updateTag();
           return;
         }
-        currentItems = Array.isArray(data.items) ? data.items : [];
-        setStatus(`Đã lấy ${currentItems.length} sản phẩm từ AccessTrade.`, 'ok');
+
+        let items = Array.isArray(data.items) ? data.items : [];
+        const beforeCount = items.length;
+
+        // Nếu có atCate, lọc lại một lần nữa theo category từ AccessTrade
+        if (atCate) {
+          const lcCate = atCate.toLowerCase();
+          items = items.filter(it =>
+            (it.category || '').toLowerCase() === lcCate
+          );
+        }
+
+        currentItems = items;
+        const afterCount = items.length;
+
+        if (atCate) {
+          setStatus(`Đã lấy ${beforeCount} sản phẩm, sau khi lọc cate="${atCate}" còn ${afterCount} sản phẩm.`, 'ok');
+        } else {
+          setStatus(`Đã lấy ${currentItems.length} sản phẩm từ AccessTrade.`, 'ok');
+        }
+
         updateTag();
 
         const previewObj = currentItems.map((it, idx) => ({
@@ -354,7 +350,7 @@
           origin: it.origin,
           merchant: it.merchant,
           sku: it.sku,
-          category: it.category
+          cate: it.category
         }));
         previewEl.value = JSON.stringify(previewObj, null, 2);
       } catch (err) {
@@ -369,7 +365,7 @@
 
     async function doPublish() {
       if (!currentItems || !currentItems.length) {
-        setStatus('Chưa có dữ liệu để publish. Hãy bấm &quot;Lấy sản phẩm&quot; trước.', 'warn');
+        setStatus('Chưa có dữ liệu để publish. Hãy bấm "Lấy sản phẩm" trước.', 'warn');
         return;
       }
 
@@ -382,16 +378,16 @@
       const targetPath = targetPathEl.value.trim() || 'data/affiliates.json';
       const commitMsg  = commitMsgEl.value.trim() || 'botbuyauto: publish';
       const campaign   = campaignEl.value.trim();
-      const categorySlug = categoryEl.value.trim();
+      const categorySlug = categorySlugEl.value.trim();
       const dryRun = !!dryRunEl.checked;
 
       const items = currentItems.map(it => {
         const cloned = { ...it };
-        // Gán category nếu người dùng nhập
+        // Gán category slug MXD nếu có
         if (categorySlug) {
           cloned.category = categorySlug;
         }
-        // Gán sub2/sub3/sub4 để tracking
+        // Gán sub để tracking
         cloned.sub1 = cloned.sku || cloned.sub1;
         cloned.sub2 = 'mxd210';
         cloned.sub3 = 'botbuyauto';
@@ -405,9 +401,10 @@
       }
 
       setLoading(true);
-      setStatus(dryRun
-        ? 'Đang gửi /auto/publish (dry run)…'
-        : 'Đang gửi /auto/publish để ghi repo…',
+      setStatus(
+        dryRun
+          ? 'Đang gửi /auto/publish (dry run)…'
+          : 'Đang gửi /auto/publish để ghi repo…',
         'info'
       );
 
