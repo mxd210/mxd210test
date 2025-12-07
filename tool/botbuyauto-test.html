@@ -1,0 +1,454 @@
+<!-- REPLACE WHOLE FILE: /tools/botbuyauto-test.html -->
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MXD BotBuyAuto – Test kéo sản phẩm & publish JSON</title>
+  <meta name="robots" content="noindex,follow"/>
+  <style>
+    :root{
+      --bg:#050816;
+      --panel:#111827;
+      --accent:#38bdf8;
+      --accent-soft:rgba(56,189,248,0.12);
+      --border:#1f2933;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --danger:#f87171;
+      --ok:#4ade80;
+      --warn:#facc15;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top,#111827 0,#020617 55%,#000 100%);
+      color:var(--text);
+      padding:16px;
+    }
+    .wrap{
+      max-width:1080px;
+      margin:0 auto;
+    }
+    h1{
+      font-size:1.6rem;
+      margin:0 0 12px;
+    }
+    p{
+      margin:4px 0;
+      color:var(--muted);
+      font-size:0.92rem;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1.1fr 1fr;
+      gap:16px;
+      margin-top:16px;
+    }
+    .panel{
+      background:var(--panel);
+      border-radius:12px;
+      border:1px solid var(--border);
+      padding:14px 16px;
+      box-shadow:0 20px 40px rgba(0,0,0,0.45);
+    }
+    .panel h2{
+      font-size:1.05rem;
+      margin:0 0 8px;
+    }
+    label{
+      display:block;
+      font-size:0.85rem;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    input,select,textarea{
+      width:100%;
+      padding:7px 9px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--text);
+      font-size:0.9rem;
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px var(--accent-soft);
+    }
+    textarea{
+      min-height:120px;
+      resize:vertical;
+      font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      white-space:pre;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .row > div{
+      flex:1;
+    }
+    .btn-row{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:none;
+      border-radius:999px;
+      padding:7px 14px;
+      font-size:0.9rem;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:var(--accent-soft);
+      color:var(--accent);
+    }
+    button.primary{
+      background:var(--accent);
+      color:#0b1120;
+      font-weight:600;
+    }
+    button.danger{
+      background:rgba(248,113,113,0.16);
+      color:var(--danger);
+    }
+    button[disabled]{
+      opacity:0.55;
+      cursor:default;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:0.78rem;
+      color:var(--muted);
+      gap:4px;
+    }
+    .tag-dot{
+      width:7px;height:7px;border-radius:999px;background:var(--accent);
+    }
+    .status{
+      margin-top:6px;
+      font-size:0.84rem;
+    }
+    .status.ok{color:var(--ok);}
+    .status.err{color:var(--danger);}
+    .status.warn{color:var(--warn);}
+    code{
+      font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:0.8rem;
+      background:#020617;
+      padding:2px 4px;
+      border-radius:4px;
+    }
+    ul.micro{
+      margin:4px 0 0 1rem;
+      padding:0;
+      font-size:0.8rem;
+      color:var(--muted);
+    }
+    ul.micro li{margin:1px 0;}
+    @media(max-width:860px){
+      .grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>MXD BotBuyAuto – Test kéo sản phẩm & publish JSON</h1>
+    <p>Công cụ test nội bộ: chọn campaign, domain và số lượng, sau đó bấm để Worker gọi AccessTrade, chuẩn hoá schema MXD và ghi vào <code>data/affiliates.json</code> của repo test.</p>
+
+    <div class="grid">
+      <!-- FORM BÊN TRÁI -->
+      <div class="panel">
+        <h2>Cấu hình & thao tác</h2>
+
+        <div class="row">
+          <div>
+            <label for="workerBase">Worker base URL</label>
+            <input id="workerBase" type="text"
+                   value="https://testbotbuy.mxd6686.workers.dev"
+                   autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="campaign">Campaign (sàn)</label>
+            <select id="campaign">
+              <option value="shopee">shopee</option>
+              <option value="lazada" selected>lazada</option>
+              <option value="tiki">tiki</option>
+              <option value="tiktok">tiktok</option>
+              <option value="mediamart">mediamart</option>
+            </select>
+          </div>
+          <div>
+            <label for="domain">Domain</label>
+            <input id="domain" type="text" value="lazada.vn" autocomplete="off"/>
+          </div>
+          <div>
+            <label for="limit">Số lượng (1–50)</label>
+            <input id="limit" type="number" min="1" max="50" value="5"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="categorySlug">Category slug MXD (gán cho tất cả item)</label>
+            <input id="categorySlug" type="text" placeholder="vd: thoi-trang-nu / do-gia-dung"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="targetPath">File JSON trong repo</label>
+            <input id="targetPath" type="text" value="data/affiliates.json"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="commitMessage">Commit message</label>
+            <input id="commitMessage" type="text"
+                   value="botbuyauto: publish from tool"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label><input id="dryRun" type="checkbox"/> Chỉ dry run (không ghi repo)</label>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnFetch" type="button">
+            <span>1) Lấy sản phẩm (fetch)</span>
+          </button>
+          <button id="btnPublish" type="button" class="primary">
+            <span>2) Publish JSON lên repo</span>
+          </button>
+          <span class="tag">
+            <span class="tag-dot"></span>
+            <span id="tagInfo">Chưa có dữ liệu</span>
+          </span>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <ul class="micro">
+          <li>sub2 mặc định: <code>mxd210</code>, sub3: <code>botbuyauto</code>, sub4: campaign/category.</li>
+          <li>Ảnh hiện vẫn dùng URL từ AccessTrade – bước sau sẽ có tool riêng tải ảnh & đổi sang .webp local.</li>
+        </ul>
+      </div>
+
+      <!-- PREVIEW BÊN PHẢI -->
+      <div class="panel">
+        <h2>Preview dữ liệu</h2>
+        <p style="margin-bottom:6px;">Xem nhanh các sản phẩm sẽ được publish (tối đa 50). Đây chỉ là preview để Mai kiểm tra tên, giá, origin, sku…</p>
+        <textarea id="preview" readonly placeholder="Chưa có dữ liệu. Bấm &quot;Lấy sản phẩm&quot; để xem."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+
+    const workerBaseEl   = $('#workerBase');
+    const campaignEl     = $('#campaign');
+    const domainEl       = $('#domain');
+    const limitEl        = $('#limit');
+    const categoryEl     = $('#categorySlug');
+    const targetPathEl   = $('#targetPath');
+    const commitMsgEl    = $('#commitMessage');
+    const dryRunEl       = $('#dryRun');
+    const btnFetch       = $('#btnFetch');
+    const btnPublish     = $('#btnPublish');
+    const previewEl      = $('#preview');
+    const statusEl       = $('#status');
+    const tagInfoEl      = $('#tagInfo');
+
+    let currentItems = [];
+
+    // auto sync domain theo campaign (cho nhanh)
+    campaignEl.addEventListener('change', () => {
+      const c = campaignEl.value;
+      if (c === 'shopee') domainEl.value = 'shopee.vn';
+      else if (c === 'lazada') domainEl.value = 'lazada.vn';
+      else if (c === 'tiki') domainEl.value = 'tiki.vn';
+      else if (c === 'tiktok') domainEl.value = 'tiktok.com';
+      else if (c === 'mediamart') domainEl.value = 'mediamart.vn';
+    });
+
+    function setLoading(isLoading) {
+      btnFetch.disabled = isLoading;
+      btnPublish.disabled = isLoading;
+    }
+
+    function setStatus(text, level = 'info') {
+      statusEl.textContent = text || '';
+      statusEl.className = 'status ' + (level === 'ok' ? 'ok' : level === 'err' ? 'err' : level === 'warn' ? 'warn' : '');
+    }
+
+    function updateTag() {
+      if (!currentItems || !currentItems.length) {
+        tagInfoEl.textContent = 'Chưa có dữ liệu';
+      } else {
+        tagInfoEl.textContent = `${currentItems.length} sản phẩm đang chờ publish`;
+      }
+    }
+
+    async function doFetch() {
+      const base = workerBaseEl.value.trim().replace(/\/+$/,'');
+      const campaign = campaignEl.value.trim();
+      const domain = domainEl.value.trim();
+      let limit = parseInt(limitEl.value, 10);
+      if (!Number.isFinite(limit) || limit < 1) limit = 5;
+      if (limit > 50) limit = 50;
+      limitEl.value = String(limit);
+
+      if (!base) {
+        setStatus('Thiếu Worker base URL.', 'err');
+        return;
+      }
+      if (!campaign) {
+        setStatus('Thiếu campaign.', 'err');
+        return;
+      }
+
+      const url = new URL(base + '/auto/fetch');
+      url.searchParams.set('campaign', campaign);
+      if (domain) url.searchParams.set('domain', domain);
+      url.searchParams.set('limit', String(limit));
+
+      setLoading(true);
+      setStatus('Đang gọi /auto/fetch…', 'info');
+      previewEl.value = '';
+
+      try {
+        const resp = await fetch(url.toString());
+        const data = await resp.json();
+        if (data.state !== 'ok') {
+          console.error(data);
+          setStatus('Fetch lỗi: ' + (data.message || data.code || resp.status), 'err');
+          currentItems = [];
+          updateTag();
+          return;
+        }
+        currentItems = Array.isArray(data.items) ? data.items : [];
+        setStatus(`Đã lấy ${currentItems.length} sản phẩm từ AccessTrade.`, 'ok');
+        updateTag();
+
+        const previewObj = currentItems.map((it, idx) => ({
+          idx: idx + 1,
+          name: it.name,
+          price: it.price,
+          origin: it.origin,
+          merchant: it.merchant,
+          sku: it.sku,
+          category: it.category
+        }));
+        previewEl.value = JSON.stringify(previewObj, null, 2);
+      } catch (err) {
+        console.error(err);
+        setStatus('Lỗi khi gọi /auto/fetch. Xem console để biết chi tiết.', 'err');
+        currentItems = [];
+        updateTag();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function doPublish() {
+      if (!currentItems || !currentItems.length) {
+        setStatus('Chưa có dữ liệu để publish. Hãy bấm &quot;Lấy sản phẩm&quot; trước.', 'warn');
+        return;
+      }
+
+      const base = workerBaseEl.value.trim().replace(/\/+$/,'');
+      if (!base) {
+        setStatus('Thiếu Worker base URL.', 'err');
+        return;
+      }
+
+      const targetPath = targetPathEl.value.trim() || 'data/affiliates.json';
+      const commitMsg  = commitMsgEl.value.trim() || 'botbuyauto: publish';
+      const campaign   = campaignEl.value.trim();
+      const categorySlug = categoryEl.value.trim();
+      const dryRun = !!dryRunEl.checked;
+
+      const items = currentItems.map(it => {
+        const cloned = { ...it };
+        // Gán category nếu người dùng nhập
+        if (categorySlug) {
+          cloned.category = categorySlug;
+        }
+        // Gán sub2/sub3/sub4 để tracking
+        cloned.sub1 = cloned.sku || cloned.sub1;
+        cloned.sub2 = 'mxd210';
+        cloned.sub3 = 'botbuyauto';
+        cloned.sub4 = categorySlug || campaign || '';
+        return cloned;
+      });
+
+      if (!dryRun) {
+        const ok = window.confirm(`Publish ${items.length} sản phẩm vào "${targetPath}"?`);
+        if (!ok) return;
+      }
+
+      setLoading(true);
+      setStatus(dryRun
+        ? 'Đang gửi /auto/publish (dry run)…'
+        : 'Đang gửi /auto/publish để ghi repo…',
+        'info'
+      );
+
+      try {
+        const resp = await fetch(base + '/auto/publish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items,
+            wrap: true,
+            target_path: targetPath,
+            commit_message: commitMsg,
+            dry_run: dryRun
+          })
+        });
+        const data = await resp.json();
+        console.log('PUBLISH RESULT', data);
+
+        if (data.state !== 'ok') {
+          setStatus('Publish lỗi: ' + (data.message || data.code || resp.status), 'err');
+          return;
+        }
+
+        if (dryRun) {
+          setStatus(`Dry run OK, ${data.preview?.items?.length || items.length} sản phẩm. File: ${targetPath}`, 'ok');
+          previewEl.value = JSON.stringify(data.preview, null, 2);
+        } else {
+          setStatus(`Publish thành công ${data.count || items.length} sản phẩm vào ${targetPath}.`, 'ok');
+        }
+      } catch (err) {
+        console.error(err);
+        setStatus('Lỗi khi gọi /auto/publish. Xem console để biết chi tiết.', 'err');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    btnFetch.addEventListener('click', () => { doFetch(); });
+    btnPublish.addEventListener('click', () => { doPublish(); });
+
+    updateTag();
+  </script>
+</body>
+</html>
