@@ -60,10 +60,19 @@
       box-shadow:0 0 0 1px var(--accent-soft);
     }
     textarea{
-      min-height:120px;
+      min-height:140px;
       resize:vertical;
       font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
       white-space:pre;
+    }
+    /* Ô preview cao hơn để Mai xem nhiều item */
+    #preview{
+      min-height:260px;
+    }
+    @media(min-width:900px){
+      #preview{
+        min-height:360px;
+      }
     }
     .row{display:flex;gap:10px;margin-bottom:10px;}
     .row > div{flex:1;}
@@ -83,10 +92,6 @@
       background:var(--accent);
       color:#0b1120;
       font-weight:600;
-    }
-    button.danger{
-      background:rgba(248,113,113,0.16);
-      color:var(--danger);
     }
     button[disabled]{opacity:0.55;cursor:default;}
     .tag{
@@ -301,10 +306,7 @@
       url.searchParams.set('campaign', campaign);
       if (domain) url.searchParams.set('domain', domain);
       url.searchParams.set('limit', String(limit));
-      if (atCate) {
-        // gửi cate lên Worker; nếu Worker forward, server sẽ lọc bớt giúp
-        url.searchParams.set('cate', atCate);
-      }
+      if (atCate) url.searchParams.set('cate', atCate);  // gửi cate xuống Worker
 
       setLoading(true);
       setStatus('Đang gọi /auto/fetch…', 'info');
@@ -321,27 +323,16 @@
           return;
         }
 
-        let items = Array.isArray(data.items) ? data.items : [];
-        const beforeCount = items.length;
-
-        // Nếu có atCate, lọc lại một lần nữa theo category từ AccessTrade
-        if (atCate) {
-          const lcCate = atCate.toLowerCase();
-          items = items.filter(it =>
-            (it.category || '').toLowerCase() === lcCate
-          );
-        }
-
-        currentItems = items;
-        const afterCount = items.length;
-
-        if (atCate) {
-          setStatus(`Đã lấy ${beforeCount} sản phẩm, sau khi lọc cate="${atCate}" còn ${afterCount} sản phẩm.`, 'ok');
-        } else {
-          setStatus(`Đã lấy ${currentItems.length} sản phẩm từ AccessTrade.`, 'ok');
-        }
-
+        const items = Array.isArray(data.items) ? data.items : [];
+        currentItems = items; // KHÔNG LỌC LẠI NỮA
         updateTag();
+
+        const srcCount = data.count ?? items.length;
+        if (atCate) {
+          setStatus(`AccessTrade trả ${srcCount} sản phẩm, đang dùng ${currentItems.length} sản phẩm (cate gửi lên: "${atCate}").`, 'ok');
+        } else {
+          setStatus(`AccessTrade trả ${srcCount} sản phẩm, đang dùng ${currentItems.length} sản phẩm (mọi cate).`, 'ok');
+        }
 
         const previewObj = currentItems.map((it, idx) => ({
           idx: idx + 1,
@@ -383,11 +374,9 @@
 
       const items = currentItems.map(it => {
         const cloned = { ...it };
-        // Gán category slug MXD nếu có
         if (categorySlug) {
           cloned.category = categorySlug;
         }
-        // Gán sub để tracking
         cloned.sub1 = cloned.sku || cloned.sub1;
         cloned.sub2 = 'mxd210';
         cloned.sub3 = 'botbuyauto';
