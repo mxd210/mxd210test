@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>MXD BotBuyAuto – Test kéo sản phẩm & publish JSON 3.5</title>
+  <title>MXD BotBuyAuto – Test kéo sản phẩm & publish JSON 3.6</title>
   <meta name="robots" content="noindex,follow"/>
   <style>
     :root{
@@ -122,6 +122,23 @@
       color:var(--muted);
     }
     ul.micro li{margin:1px 0;}
+    details{
+      margin-top:6px;
+      font-size:0.78rem;
+      color:var(--muted);
+    }
+    details summary{
+      cursor:pointer;
+      list-style:none;
+    }
+    details summary::marker,
+    details summary::-webkit-details-marker{
+      display:none;
+    }
+    details summary span{
+      text-decoration:underline;
+      text-decoration-style:dotted;
+    }
     @media(max-width:860px){.grid{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -169,7 +186,7 @@
           <div>
             <label for="atCate">AT cate (mã ngành hàng)</label>
             <input id="atCate" type="text"
-                   placeholder="vd: cong-nghe, dien-thoai-may-tinh-bang, thiet-bi-gia-dung"/>
+                   placeholder="vd: cong-nghe, thoi-trang-my-pham, thiet-bi-gia-dung"/>
           </div>
         </div>
 
@@ -220,10 +237,37 @@
         <ul class="micro">
           <li><b>AT cate</b> là mã ngành của AccessTrade (không phải slug MXD), ví dụ:
             <code>cong-nghe</code>, <code>dien-thoai-may-tinh-bang</code>,
-            <code>thiet-bi-gia-dung</code>, <code>health_and_beauty</code>…</li>
+            <code>thiet-bi-gia-dung</code>, <code>thoi-trang-my-pham</code>…</li>
           <li><b>Category slug MXD</b> là tên kệ của Mai (vd: <code>do-dien-tu</code>), sẽ ghi vào field <code>category</code> trong JSON.</li>
           <li>Ảnh: nếu item chưa có <code>image</code> nhưng có <code>sku</code>, tool sẽ mặc định dùng đường dẫn local <code>/assets/img/products/&lt;sku&gt;.webp</code>.</li>
         </ul>
+
+        <details>
+          <summary><span>Danh sách mã cate gợi ý (AccessTrade)</span></summary>
+          <ul class="micro">
+            <li><code>dien-thoai-may-tinh-bang</code> – Điện thoại – Máy tính bảng</li>
+            <li><code>tivi-am-thanh</code> – Tivi – Âm thanh</li>
+            <li><code>thiet-bi-gia-dung</code> – Thiết bị gia dụng</li>
+            <li><code>dien-lanh</code> – Điện lạnh</li>
+            <li><code>may-anh-may-quay-phim</code> – Máy ảnh – Máy quay phim</li>
+            <li><code>may-tinh-lap-top-phu-kien</code> – Máy tính – Laptop – Phụ kiện</li>
+            <li><code>me-va-be</code> – Mẹ và bé</li>
+            <li><code>suc-khoe</code> – Sức khỏe</li>
+            <li><code>noi-that</code> – Nội thất</li>
+            <li><code>sach-vpp-qua-tang</code> – Sách – VPP – Quà tặng</li>
+            <li><code>nhac-cu</code> – Nhạc cụ</li>
+            <li><code>do-the-thao</code> – Đồ thể thao</li>
+            <li><code>may-cong-nghiep</code> – Máy công nghiệp</li>
+            <li><code>thoi-trang-my-pham</code> – Thời trang – Mỹ phẩm</li>
+            <li><code>thuc-pham-do-uong</code> – Thực phẩm, đồ uống</li>
+            <li><code>o-to-xe-may-xe-dap</code> – Ô tô, xe máy, xe đạp</li>
+            <li><code>voucher-dich-vu</code> – Voucher &amp; Dịch vụ</li>
+            <li><code>cong-nghe</code> – Công nghệ</li>
+            <li><code>tin-hoc</code> – Tin học</li>
+            <li><code>du-lich-the-thao-da-ngoai</code> – Du lịch – Thể thao – Dã ngoại</li>
+            <li><code>nha-cua-doi-song</code> – Nhà cửa đời sống</li>
+          </ul>
+        </details>
       </div>
 
       <!-- PREVIEW -->
@@ -327,7 +371,7 @@
       const priceText = formatVnd(item.price);
       const merchantLabel = humanMerchantLabel(item.merchant || campaign);
       const cat = categorySlug || item.category || '';
-      const catLabel = cat ? cat.replace(/-/g,' ') : 'ưu đãi';
+      const catLabel = cat ? cat.replace(/-/g, ' ') : 'ưu đãi';
 
       const shortDesc =
         `${name} – lựa chọn phù hợp cho bạn với ${priceText}. ` +
@@ -347,7 +391,7 @@
     }
 
     async function doFetch() {
-      const base = workerBaseEl.value.trim().replace(/\/+$/,'');
+      const base = workerBaseEl.value.trim().replace(/\/+$/, '');
       const campaign = campaignEl.value.trim();
       const domain = domainEl.value.trim();
       let limit = parseInt(limitEl.value, 10);
@@ -364,7 +408,7 @@
       url.searchParams.set('campaign', campaign);
       if (domain) url.searchParams.set('domain', domain);
       url.searchParams.set('limit', String(limit));
-      if (atCate) url.searchParams.set('cate', atCate);  // gửi cate xuống Worker
+      if (atCate) url.searchParams.set('cate', atCate); // Worker sẽ map sang cat
 
       setLoading(true);
       setStatus('Đang gọi /auto/fetch…', 'info');
@@ -385,33 +429,41 @@
         currentItems = items;
         updateTag();
 
-        const srcTotal = typeof data.total === 'number'
-          ? data.total
-          : (typeof data.count === 'number' ? data.count : items.length);
-        const usedFallback = !!data.used_fallback;
+        const srcTotal =
+          typeof data.total_from_at === 'number' ? data.total_from_at :
+          typeof data.total === 'number'        ? data.total :
+          typeof data.count === 'number'        ? data.count :
+          items.length;
 
         const cateSet = new Set(
           items
-            .map(it => it.category)
+            .map(it => it.cate_from_at || it.category)
             .filter(v => typeof v === 'string' && v.trim())
         );
         const cateList = Array.from(cateSet);
 
-        let msg = '';
-        if (usedFallback && atCate) {
-          msg = `Không có sản phẩm nào với cate="${atCate}" trên AccessTrade. ` +
-                `Đang dùng ${items.length} sản phẩm fallback (không lọc cate).`;
-        } else if (atCate) {
-          msg = `AccessTrade trả ${srcTotal} sản phẩm, đang dùng ${items.length} sản phẩm (cate gửi lên: "${atCate}").`;
+        let msg;
+        if (atCate) {
+          if (!items.length) {
+            msg = `AccessTrade trả 0 sản phẩm cho cate="${atCate}" (campaign: ${campaign}, domain: ${domain}). ` +
+                  `Thử cate khác hoặc để trống ô AT cate để xem feed tổng.`;
+            setStatus(msg, 'warn');
+          } else {
+            msg = `AccessTrade trả khoảng ${srcTotal} sản phẩm (hoặc nhiều hơn) cho chiến dịch này, ` +
+                  `đang xem ${items.length} sản phẩm đầu với cate gửi lên: "${atCate}".`;
+            if (cateList.length) {
+              msg += ` Cate thực tế trong kết quả: ${cateList.slice(0, 6).join(', ')}.`;
+            }
+            setStatus(msg, 'ok');
+          }
         } else {
-          msg = `AccessTrade trả ${srcTotal} sản phẩm, đang dùng ${items.length} sản phẩm (không lọc cate).`;
+          msg = `AccessTrade trả khoảng ${srcTotal} sản phẩm (feed tổng), ` +
+                `đang xem ${items.length} sản phẩm đầu (không lọc cate).`;
+          if (cateList.length) {
+            msg += ` Cate thấy trong kết quả: ${cateList.slice(0, 6).join(', ')}.`;
+          }
+          setStatus(msg, items.length ? 'ok' : 'warn');
         }
-
-        if (cateList.length) {
-          msg += ` Cate thấy trong kết quả: ${cateList.slice(0, 6).join(', ')}.`;
-        }
-
-        setStatus(msg, items.length ? 'ok' : 'warn');
 
         const previewObj = currentItems.map((it, idx) => ({
           idx: idx + 1,
@@ -420,9 +472,13 @@
           origin: it.origin,
           merchant: it.merchant,
           sku: it.sku,
-          cate_from_at: it.category
+          cate_from_at: it.cate_from_at || it.category || ''
         }));
         previewEl.value = JSON.stringify(previewObj, null, 2);
+
+        if (data.api_url) {
+          console.log('AT DATAFEEDS URL:', data.api_url);
+        }
       } catch (err) {
         console.error(err);
         setStatus('Lỗi khi gọi /auto/fetch. Xem console để biết chi tiết.', 'err');
@@ -439,7 +495,7 @@
         return;
       }
 
-      const base = workerBaseEl.value.trim().replace(/\/+$/,'');
+      const base = workerBaseEl.value.trim().replace(/\/+$/, '');
       if (!base) {
         setStatus('Thiếu Worker base URL.', 'err');
         return;
@@ -452,21 +508,23 @@
       const dryRun       = !!dryRunEl.checked;
 
       const items = currentItems.map(it => {
-        // Chuẩn hóa item theo schema MXD
+        const sku = (it.sku || '').toString();
+
         const baseItem = {
           name: (it.name || '').toString(),
           price: Number(it.price) || 0,
           origin: (it.origin || it.url || '').toString(),
           merchant: (it.merchant || campaign || '').toString().toLowerCase(),
-          sku: (it.sku || '').toString(),
+          sku,
           image: (it.image || '').toString(),
-          category: (categorySlug || it.category || '').toString(),
+          category: (categorySlug || it.category || '').toString(),          // slug kệ MXD
+          cate_from_at: (it.cate_from_at || it.category || '').toString(),   // cate gốc từ AT
           brand: (it.brand || '').toString(),
           featured: !!it.featured,
           status: it.status !== false,
           updated_at: (it.updated_at || new Date().toISOString()).toString(),
           deeplink: (it.deeplink || '').toString(),
-          sub1: (it.sku || it.sub1 || '').toString(),
+          sub1: (it.sub1 || sku).toString(),
           short_desc: (it.short_desc || '').toString(),
           seo_title: (it.seo_title || '').toString(),
           seo_description: (it.seo_description || '').toString(),
