@@ -1,4 +1,4 @@
-<!-- REPLACE WHOLE FILE: /tools/botbuyauto-test.html -->
+<!-- REPLACE WHOLE FILE: /tools/botbuyauto-test.html --> 
 <!doctype html>
 <html lang="vi">
 <head>
@@ -65,7 +65,6 @@
       font-family:ui-monospace,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
       white-space:pre;
     }
-    /* Ô preview cao hơn để Mai xem nhiều item */
     #preview{
       min-height:260px;
     }
@@ -219,11 +218,11 @@
         <div id="status" class="status"></div>
 
         <ul class="micro">
-          <li><b>AT cate</b> là mã ngành của AccessTrade, ví dụ:
+          <li><b>AT cate</b> là mã ngành của AccessTrade (không phải slug MXD), ví dụ:
             <code>cong-nghe</code>, <code>dien-thoai-may-tinh-bang</code>,
-            <code>thiet-bi-gia-dung</code>, <code>thoi-trang-my-pham</code>, <code>suc-khoe</code>…</li>
+            <code>thiet-bi-gia-dung</code>, <code>health_and_beauty</code>…</li>
           <li><b>Category slug MXD</b> là tên kệ của Mai (vd: <code>do-dien-tu</code>), sẽ ghi vào field <code>category</code> trong JSON.</li>
-          <li>Ảnh hiện vẫn dùng URL từ AccessTrade – bước sau sẽ có tool riêng tải ảnh & đổi sang .webp local.</li>
+          <li>Ảnh: nếu item chưa có <code>image</code> nhưng có <code>sku</code>, tool sẽ mặc định dùng đường dẫn local <code>/assets/img/products/&lt;sku&gt;.webp</code>.</li>
         </ul>
       </div>
 
@@ -288,6 +287,65 @@
       }
     }
 
+    function humanMerchantLabel(m) {
+      const v = (m || '').toLowerCase();
+      if (v === 'shopee') return 'Shopee';
+      if (v === 'lazada') return 'Lazada';
+      if (v === 'tiki') return 'Tiki';
+      if (v === 'tiktok') return 'TikTok Shop';
+      if (v === 'mediamart') return 'MediaMart';
+      return 'sàn thương mại điện tử';
+    }
+
+    function formatVnd(n) {
+      const num = Number(n) || 0;
+      if (!num) return 'giá tốt';
+      return new Intl.NumberFormat('vi-VN').format(num) + '₫';
+    }
+
+    function buildTagsFromName(name) {
+      const text = (name || '').toLowerCase();
+      const noAccents = text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      const cleaned = noAccents.replace(/[^a-z0-9\s]+/g, ' ');
+      const parts = cleaned.split(/\s+/).filter(w => w.length > 1 && w.length <= 15);
+      const seen = new Set();
+      const tags = [];
+      for (const w of parts) {
+        if (!seen.has(w)) {
+          seen.add(w);
+          tags.push(w);
+          if (tags.length >= 12) break;
+        }
+      }
+      return tags;
+    }
+
+    function buildSeoFields(item, categorySlug, campaign) {
+      const name = (item.name || '').toString().trim();
+      const priceText = formatVnd(item.price);
+      const merchantLabel = humanMerchantLabel(item.merchant || campaign);
+      const cat = categorySlug || item.category || '';
+      const catLabel = cat ? cat.replace(/-/g,' ') : 'ưu đãi';
+
+      const shortDesc =
+        `${name} – lựa chọn phù hợp cho bạn với ${priceText}. ` +
+        `Đặt mua online trên ${merchantLabel} qua MXD.`;
+
+      const seoTitle = `${name} | ${catLabel} | MXD`;
+
+      const seoDescription =
+        `${name} do MXD chọn lọc, phù hợp nhu cầu sử dụng hàng ngày. ` +
+        `Giá tham khảo khoảng ${priceText}. ` +
+        `Đặt mua trên ${merchantLabel} qua liên kết affiliate MXD. ` +
+        shortDesc;
+
+      const tags = buildTagsFromName(name);
+
+      return { short_desc: shortDesc, seo_title: seoTitle, seo_description: seoDescription, tags };
+    }
+
     async function doFetch() {
       const base = workerBaseEl.value.trim().replace(/\/+$/,'');
       const campaign = campaignEl.value.trim();
@@ -324,15 +382,36 @@
         }
 
         const items = Array.isArray(data.items) ? data.items : [];
-        currentItems = items; // KHÔNG LỌC LẠI NỮA
+        currentItems = items;
         updateTag();
 
-        const srcCount = data.count ?? items.length;
-        if (atCate) {
-          setStatus(`AccessTrade trả ${srcCount} sản phẩm, đang dùng ${currentItems.length} sản phẩm (cate gửi lên: "${atCate}").`, 'ok');
+        const srcTotal = typeof data.total === 'number'
+          ? data.total
+          : (typeof data.count === 'number' ? data.count : items.length);
+        const usedFallback = !!data.used_fallback;
+
+        const cateSet = new Set(
+          items
+            .map(it => it.category)
+            .filter(v => typeof v === 'string' && v.trim())
+        );
+        const cateList = Array.from(cateSet);
+
+        let msg = '';
+        if (usedFallback && atCate) {
+          msg = `Không có sản phẩm nào với cate="${atCate}" trên AccessTrade. ` +
+                `Đang dùng ${items.length} sản phẩm fallback (không lọc cate).`;
+        } else if (atCate) {
+          msg = `AccessTrade trả ${srcTotal} sản phẩm, đang dùng ${items.length} sản phẩm (cate gửi lên: "${atCate}").`;
         } else {
-          setStatus(`AccessTrade trả ${srcCount} sản phẩm, đang dùng ${currentItems.length} sản phẩm (mọi cate).`, 'ok');
+          msg = `AccessTrade trả ${srcTotal} sản phẩm, đang dùng ${items.length} sản phẩm (không lọc cate).`;
         }
+
+        if (cateList.length) {
+          msg += ` Cate thấy trong kết quả: ${cateList.slice(0, 6).join(', ')}.`;
+        }
+
+        setStatus(msg, items.length ? 'ok' : 'warn');
 
         const previewObj = currentItems.map((it, idx) => ({
           idx: idx + 1,
@@ -341,7 +420,7 @@
           origin: it.origin,
           merchant: it.merchant,
           sku: it.sku,
-          cate: it.category
+          cate_from_at: it.category
         }));
         previewEl.value = JSON.stringify(previewObj, null, 2);
       } catch (err) {
@@ -366,22 +445,49 @@
         return;
       }
 
-      const targetPath = targetPathEl.value.trim() || 'data/affiliates.json';
-      const commitMsg  = commitMsgEl.value.trim() || 'botbuyauto: publish';
-      const campaign   = campaignEl.value.trim();
+      const targetPath   = targetPathEl.value.trim() || 'data/affiliates.json';
+      const commitMsg    = commitMsgEl.value.trim() || 'botbuyauto: publish';
+      const campaign     = campaignEl.value.trim();
       const categorySlug = categorySlugEl.value.trim();
-      const dryRun = !!dryRunEl.checked;
+      const dryRun       = !!dryRunEl.checked;
 
       const items = currentItems.map(it => {
-        const cloned = { ...it };
-        if (categorySlug) {
-          cloned.category = categorySlug;
+        // Chuẩn hóa item theo schema MXD
+        const baseItem = {
+          name: (it.name || '').toString(),
+          price: Number(it.price) || 0,
+          origin: (it.origin || it.url || '').toString(),
+          merchant: (it.merchant || campaign || '').toString().toLowerCase(),
+          sku: (it.sku || '').toString(),
+          image: (it.image || '').toString(),
+          category: (categorySlug || it.category || '').toString(),
+          brand: (it.brand || '').toString(),
+          featured: !!it.featured,
+          status: it.status !== false,
+          updated_at: (it.updated_at || new Date().toISOString()).toString(),
+          deeplink: (it.deeplink || '').toString(),
+          sub1: (it.sku || it.sub1 || '').toString(),
+          short_desc: (it.short_desc || '').toString(),
+          seo_title: (it.seo_title || '').toString(),
+          seo_description: (it.seo_description || '').toString(),
+          tags: Array.isArray(it.tags) ? it.tags.slice(0, 20) : []
+        };
+
+        if (!baseItem.image && baseItem.sku) {
+          baseItem.image = `/assets/img/products/${baseItem.sku}.webp`;
         }
-        cloned.sub1 = cloned.sku || cloned.sub1;
-        cloned.sub2 = 'mxd210';
-        cloned.sub3 = 'botbuyauto';
-        cloned.sub4 = categorySlug || campaign || '';
-        return cloned;
+
+        const seoFields = buildSeoFields(baseItem, categorySlug, campaign);
+        baseItem.short_desc      = seoFields.short_desc;
+        baseItem.seo_title       = seoFields.seo_title;
+        baseItem.seo_description = seoFields.seo_description;
+        baseItem.tags            = seoFields.tags;
+
+        baseItem.sub2 = 'mxd210';
+        baseItem.sub3 = 'botbuyauto';
+        baseItem.sub4 = categorySlug || campaign || '';
+
+        return baseItem;
       });
 
       if (!dryRun) {
@@ -418,10 +524,16 @@
         }
 
         if (dryRun) {
-          setStatus(`Dry run OK, ${data.preview?.items?.length || items.length} sản phẩm. File: ${targetPath}`, 'ok');
+          setStatus(
+            `Dry run OK, ${data.preview?.items?.length || items.length} sản phẩm. File: ${targetPath}`,
+            'ok'
+          );
           previewEl.value = JSON.stringify(data.preview, null, 2);
         } else {
-          setStatus(`Publish thành công ${data.count || items.length} sản phẩm vào ${targetPath}.`, 'ok');
+          setStatus(
+            `Publish thành công ${data.count || items.length} sản phẩm vào ${targetPath}.`,
+            'ok'
+          );
         }
       } catch (err) {
         console.error(err);
